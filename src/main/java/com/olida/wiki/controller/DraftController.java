@@ -1,6 +1,8 @@
 package com.olida.wiki.controller;
 
+import com.nimbusds.jose.shaded.json.JSONObject;
 import com.olida.wiki.model.Article;
+import com.olida.wiki.model.Draft;
 import com.olida.wiki.model.User;
 import com.olida.wiki.security.JwtTokenRepository;
 import com.olida.wiki.service.ArticleService;
@@ -24,9 +26,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.lang.model.type.UnionType;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Base64;
-import java.util.List;
-import java.util.Objects;
+import java.sql.Timestamp;
+import java.util.*;
 
 @RestController
 @RequestMapping("/articles/{article_id}/drafts")
@@ -38,15 +39,19 @@ public class DraftController {
     private JwtTokenRepository tokenRepository;
 
 
-    public DraftController(UserService userService, ArticleService articleService, JwtTokenRepository jwtTokenRepository) {
+    public DraftController(UserService userService,
+                           ArticleService articleService,
+                           JwtTokenRepository jwtTokenRepository,
+                           DraftService draftService) {
         this.userService = userService;
         this.articleService = articleService;
         this.tokenRepository = jwtTokenRepository;
+        this.draftService = draftService;
     }
 
 
     @PostMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody Object creaateArticle(@RequestBody com.olida.wiki.model.Article article, HttpServletResponse response) {
+    public @ResponseBody Object createDraft(@PathVariable(value="article_id") String article_id, @RequestBody com.olida.wiki.model.Draft draft, HttpServletResponse response) {
         ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
         HttpServletRequest request = attr.getRequest();
         String bearerToken = request.getHeader("Authorization");
@@ -57,16 +62,19 @@ public class DraftController {
         String username = jws.getBody().getSubject();
         User user = userService.getByLogin(username);
 
-        if (user.getIsadmin()){
-            return articleService.save(article);
-        } else {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return articleService.getAll();
-        }
+        Date now = new Date();
+        draft.setCreatedAt(new Timestamp(now.getTime()));
+        Optional<Article> article = articleService.getOne(Integer.valueOf(article_id));
+        article.ifPresent(draft::setArticle);
+        draft.setAuthor(user);
+
+        draft.setIsApproved(user.getIsadmin());
+        return draftService.save(draft);
     }
 
+
     @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody List<Article> getArticles(@RequestParam String category) {
+    public @ResponseBody List<Draft> getDrafts(@PathVariable(value="article_id") String article_id, HttpServletResponse response) {
         ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
         HttpServletRequest request = attr.getRequest();
         String bearerToken = request.getHeader("Authorization");
@@ -77,10 +85,16 @@ public class DraftController {
         String username = jws.getBody().getSubject();
         User user = userService.getByLogin(username);
 
-        if(user.getIsadmin()){
-            return articleService.getAllByCategory(category);
+        Optional<Article> article = articleService.getOne(Integer.valueOf(article_id));
+        if (article.isPresent()){
+            List<Draft> drafts = draftService.getAllByArticleAndIsApproved(article.get(), true);
+            if(user.getIsadmin()) {
+                drafts.addAll(draftService.getAllByArticleAndIsApproved(article.get(), false));
+            }
+            return drafts;
         } else {
-            return articleService.getAllByCategory(category);
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return new ArrayList<>();
         }
     }
 

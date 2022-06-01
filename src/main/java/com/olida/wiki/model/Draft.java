@@ -20,13 +20,13 @@ public class Draft {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "first", nullable = true, unique = false)
+    @Column(name = "first", nullable = true, unique = false, columnDefinition = "TEXT")
     private String first;
 
-    @Column(name = "second", nullable = true, unique = false)
+    @Column(name = "second", nullable = true, unique = false, columnDefinition = "TEXT")
     private String second;
 
-    @Column(name = "third", nullable = true, unique = false)
+    @Column(name = "third", nullable = true, unique = false, columnDefinition = "TEXT")
     private String third;
 
 

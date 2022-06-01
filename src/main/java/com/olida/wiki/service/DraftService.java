@@ -22,9 +22,9 @@ public class DraftService {
         return this.draftRepository.findAll();
     }
 
-//    public List<Draft> getAllByCategory(String category) {
-//        return this.draftRepository.findByCategory(category);
-//    }
+    public List<Draft> getAllByArticleAndIsApproved(Article article, boolean isApproved) {
+        return this.draftRepository.findByArticleAndIsApproved(article, isApproved);
+    }
 
     public Draft save(Draft draft){
         return this.draftRepository.save(draft);

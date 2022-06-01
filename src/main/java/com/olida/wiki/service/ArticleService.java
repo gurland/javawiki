@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class ArticleService {
@@ -22,6 +23,10 @@ public class ArticleService {
 
     public List<Article> getAll() {
         return this.repository.findAll();
+    }
+
+    public Optional<Article> getOne(Integer id){
+        return this.repository.findById(id);
     }
 
     public List<Article> getAllByCategory(String category) {
