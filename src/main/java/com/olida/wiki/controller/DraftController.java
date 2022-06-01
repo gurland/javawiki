@@ -98,13 +98,31 @@ public class DraftController {
         }
     }
 
-    @PostMapping(path = "/register", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody com.olida.wiki.model.User add(@RequestBody com.olida.wiki.model.User user, HttpServletResponse response) {
-        try {
-            return userService.saveUser(user);
-        } catch (DataIntegrityViolationException e) {
-            response.setStatus(HttpServletResponse.SC_CONFLICT);
-            return user;
+    @PutMapping(path = "/{draft_id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody com.olida.wiki.model.Draft changeDraftApproval(
+            @PathVariable(value="draft_id") String draft_id,
+            @RequestBody com.olida.wiki.model.Draft draft,
+            HttpServletResponse response
+    ) {
+        ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+        HttpServletRequest request = attr.getRequest();
+        String bearerToken = request.getHeader("Authorization");
+
+        Jws<Claims> jws = Jwts.parser()
+                .setSigningKey(this.tokenRepository.getSecret())
+                .parseClaimsJws(bearerToken.split(" ")[1]);
+        String username = jws.getBody().getSubject();
+        User user = userService.getByLogin(username);
+
+        if (user.getIsadmin()){
+            Optional<Draft> requestedDraft = draftService.getOne(Integer.valueOf(draft_id));
+            if (requestedDraft.isPresent()){
+                requestedDraft.get().setIsApproved(draft.getIsApproved());
+                return draftService.save(requestedDraft.get());
+            }
         }
+
+        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        return new Draft();
     }
 }
