@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -84,13 +85,8 @@ public class ArticleController {
         }
     }
 
-    @PostMapping(path = "/register", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody com.olida.wiki.model.User add(@RequestBody com.olida.wiki.model.User user, HttpServletResponse response) {
-        try {
-            return userService.saveUser(user);
-        } catch (DataIntegrityViolationException e) {
-            response.setStatus(HttpServletResponse.SC_CONFLICT);
-            return user;
-        }
+    @GetMapping(path = "{article_id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody Optional<Article> getArticle(@PathVariable(value="article_id") String article_id) {
+        return articleService.getOne(Integer.valueOf(article_id));
     }
 }
