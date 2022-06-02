@@ -98,7 +98,7 @@ public class DraftController {
         }
     }
 
-    @PutMapping(path = "/{draft_id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/{draft_id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody com.olida.wiki.model.Draft changeDraftApproval(
             @PathVariable(value="draft_id") String draft_id,
             @RequestBody com.olida.wiki.model.Draft draft,
