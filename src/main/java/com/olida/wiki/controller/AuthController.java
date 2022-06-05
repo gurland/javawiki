@@ -26,6 +26,7 @@ public class AuthController {
 
         HashMap<String, Object> claims = new HashMap<String, Object>();
         claims.put("isAdmin", user.getIsadmin());
+        claims.put("login", user.getLogin());
 
         return Jwts.builder()
                 .setId(id)

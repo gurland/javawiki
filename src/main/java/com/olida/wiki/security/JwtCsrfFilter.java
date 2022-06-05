@@ -47,7 +47,7 @@ public class JwtCsrfFilter extends OncePerRequestFilter {
             } catch (Exception e) {
                 resolver.resolveException(request, response, null, new MissingCsrfTokenException(csrfToken.getToken()));
             }
-        } else {
+        }  else {
             String actualToken = request.getHeader(csrfToken.getHeaderName());
             if (actualToken == null) {
                 actualToken = request.getParameter(csrfToken.getParameterName());
