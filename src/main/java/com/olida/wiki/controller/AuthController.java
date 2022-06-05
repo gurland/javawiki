@@ -48,7 +48,6 @@ public class AuthController {
     public @ResponseBody Object getAuthUser(@RequestBody (required = false) com.olida.wiki.model.User newUser) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null) {
-            // Register logic
             return null;
         }
 
@@ -56,17 +55,18 @@ public class AuthController {
         User user = (principal instanceof User) ? (User) principal : null;
 
         com.olida.wiki.model.User currentUser;
-        if (Objects.equals(newUser.getFirstname(), "login")) {
-            currentUser = userService.getByLogin(user.getUsername());
-        } else if (Objects.equals(newUser.getFirstname(), "register")) {
-            newUser.setIsadmin(false);
-            userService.saveUser(newUser);
-            currentUser = newUser;
-        } else {
-            return null;
-        }
 
         try {
+            if (Objects.equals(newUser.getFirstname(), "login")) {
+                currentUser = userService.getByLogin(user.getUsername());
+            } else if (Objects.equals(newUser.getFirstname(), "register")) {
+                newUser.setIsadmin(false);
+                userService.saveUser(newUser);
+                currentUser = newUser;
+            } else {
+                return null;
+            }
+
             HashMap<String, String> token_json = new HashMap<String, String>();
             token_json.put("token", this.generateJWT(currentUser));
             return token_json;
