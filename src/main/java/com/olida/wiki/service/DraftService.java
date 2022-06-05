@@ -2,6 +2,7 @@ package com.olida.wiki.service;
 
 import com.olida.wiki.model.Article;
 import com.olida.wiki.model.Draft;
+import com.olida.wiki.model.User;
 import com.olida.wiki.repository.article.ArticleRepository;
 import com.olida.wiki.repository.draft.DraftRepository;
 import com.olida.wiki.repository.user.UserRepository;
@@ -25,6 +26,10 @@ public class DraftService {
 
     public List<Draft> getAllByArticleAndIsApproved(Article article, boolean isApproved) {
         return this.draftRepository.findByArticleAndIsApproved(article, isApproved);
+    }
+
+    public List<Draft> getAllApprovedDraftsByUser(User user) {
+        return this.draftRepository.findByAuthorAndIsApproved(user, true);
     }
 
     public Optional<Draft> getOne(Integer id){

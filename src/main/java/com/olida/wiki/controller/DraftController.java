@@ -24,6 +24,11 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.lang.model.type.UnionType;
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.sql.Timestamp;
@@ -98,6 +103,8 @@ public class DraftController {
         }
     }
 
+    EntityManager em;
+
     @PostMapping(path = "/{draft_id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody com.olida.wiki.model.Draft changeDraftApproval(
             @PathVariable(value="draft_id") String draft_id,
@@ -117,7 +124,14 @@ public class DraftController {
         if (user.getIsadmin()){
             Optional<Draft> requestedDraft = draftService.getOne(Integer.valueOf(draft_id));
             if (requestedDraft.isPresent()){
-                requestedDraft.get().setIsApproved(draft.getIsApproved());
+                if (requestedDraft.get().getIsApproved() != null) {
+                    requestedDraft.get().setIsApproved(draft.getIsApproved());
+                    List<Draft> approvedDrafts = draftService.getAllApprovedDraftsByUser(requestedDraft.get().getAuthor());
+                    if (approvedDrafts.stream().count() > 3) {
+                        requestedDraft.get().getAuthor().setIsadmin(true);
+                        userService.saveUser(requestedDraft.get().getAuthor());
+                    }
+                }
                 return draftService.save(requestedDraft.get());
             }
         }

@@ -97,6 +97,5 @@ public class AuthController {
         HashMap<String, String> token_json = new HashMap<String, String>();
         token_json.put("token", this.generateJWT(user));
         return token_json;
-
     }
 }

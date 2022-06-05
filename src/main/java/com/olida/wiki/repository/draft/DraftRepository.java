@@ -10,4 +10,6 @@ import java.util.List;
 
 public interface DraftRepository extends JpaRepository<Draft, Integer> {
     List<Draft> findByArticleAndIsApproved(Article article, boolean isApproved);
+
+    List<Draft> findByAuthorAndIsApproved(User author, boolean isApproved);
 }
