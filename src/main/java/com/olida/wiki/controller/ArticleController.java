@@ -85,8 +85,21 @@ public class ArticleController {
         }
     }
 
-    @GetMapping(path = "{article_id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/{article_id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody Optional<Article> getArticle(@PathVariable(value="article_id") String article_id) {
         return articleService.getOne(Integer.valueOf(article_id));
+    }
+
+    @PutMapping(path = "/{article_id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody Object editArticle(@PathVariable(value="article_id") String article_id, @RequestBody Article newArticle) {
+        Optional<Article> existingArticle = articleService.getOne(Integer.valueOf(article_id));
+        if (existingArticle.isPresent()){
+            existingArticle.get().setCategory(newArticle.getCategory());
+            existingArticle.get().setImage(newArticle.getImage());
+            existingArticle.get().setTitle(newArticle.getTitle());
+            return this.articleService.save(existingArticle.get());
+        }
+
+        return null;
     }
 }
