@@ -24,17 +24,13 @@ public class AuthController {
         Date exp = Date.from(LocalDateTime.now().plusMinutes(3600)
                 .atZone(ZoneId.systemDefault()).toInstant());
 
-        HashMap<String, Object> claims = new HashMap<String, Object>();
-        claims.put("isAdmin", user.getIsadmin());
-        claims.put("login", user.getLogin());
-
         return Jwts.builder()
                 .setId(id)
                 .setSubject(user.getLogin())
                 .setIssuedAt(now)
                 .setNotBefore(now)
                 .setExpiration(exp)
-                .setClaims(claims)
+                .claim("isAdmin", user.getIsadmin())
                 .signWith(SignatureAlgorithm.HS256, "secret")
                 .compact();
     }
