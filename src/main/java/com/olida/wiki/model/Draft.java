@@ -41,6 +41,6 @@ public class Draft {
     @Column(name = "created_at", nullable = false, unique = false)
     private Timestamp createdAt;
 
-    @Column(name = "is_approved", nullable = false, unique = false)
-    private Boolean isApproved;
+    @Column(name = "is_approved", nullable = true, unique = false)
+    private Boolean isApproved = null;
 }
