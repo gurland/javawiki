@@ -13,10 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -52,15 +49,24 @@ public class AuthController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null) {
             // Register logic
-            newUser.setIsadmin(false);
-            return userService.saveUser(newUser);
+            return null;
         }
 
         Object principal = auth.getPrincipal();
         User user = (principal instanceof User) ? (User) principal : null;
 
+        com.olida.wiki.model.User currentUser;
+        if (Objects.equals(newUser.getFirstname(), "login")) {
+            currentUser = userService.getByLogin(user.getUsername());
+        } else if (Objects.equals(newUser.getFirstname(), "register")) {
+            newUser.setIsadmin(false);
+            userService.saveUser(newUser);
+            currentUser = newUser;
+        } else {
+            return null;
+        }
+
         try {
-            com.olida.wiki.model.User currentUser = userService.getByLogin(user.getUsername());
             HashMap<String, String> token_json = new HashMap<String, String>();
             token_json.put("token", this.generateJWT(currentUser));
             return token_json;
