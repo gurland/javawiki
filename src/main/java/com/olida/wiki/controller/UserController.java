@@ -24,6 +24,11 @@ public class UserController {
     public @ResponseBody List<User> getAll() {
         return this.service.getAll();
     }
+
+    @GetMapping(path = "/users/{login}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody User getUserById(@PathVariable(value="login") String login) {
+        return this.service.getByLogin(login);
+    }
 }
 
 //import com.olida.wiki.model.User;
