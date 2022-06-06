@@ -17,6 +17,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -56,7 +57,11 @@ public class DraftController {
 
 
     @PostMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody Object createDraft(@PathVariable(value="article_id") String article_id, @RequestBody com.olida.wiki.model.Draft draft, HttpServletResponse response) {
+    public @ResponseBody Object createDraft(
+            @PathVariable(value="article_id") String article_id,
+            @RequestBody com.olida.wiki.model.Draft draft,
+            HttpServletResponse response
+    ) {
         ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
         HttpServletRequest request = attr.getRequest();
         String bearerToken = request.getHeader("Authorization");
@@ -73,13 +78,16 @@ public class DraftController {
         article.ifPresent(draft::setArticle);
         draft.setAuthor(user);
 
-        draft.setIsApproved(user.getIsadmin());
         return draftService.save(draft);
     }
 
 
     @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody List<Draft> getDrafts(@PathVariable(value="article_id") String article_id, @RequestParam (required = false) Boolean isApproved, HttpServletResponse response) {
+    public @ResponseBody List<Draft> getDrafts(
+            @PathVariable(value="article_id") String article_id,
+            @Nullable @RequestParam (required = false) Boolean isApproved,
+            HttpServletResponse response
+    ) {
         ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
         HttpServletRequest request = attr.getRequest();
         String bearerToken = request.getHeader("Authorization");

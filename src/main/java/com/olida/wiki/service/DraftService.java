@@ -3,9 +3,7 @@ package com.olida.wiki.service;
 import com.olida.wiki.model.Article;
 import com.olida.wiki.model.Draft;
 import com.olida.wiki.model.User;
-import com.olida.wiki.repository.article.ArticleRepository;
 import com.olida.wiki.repository.draft.DraftRepository;
-import com.olida.wiki.repository.user.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,8 +22,12 @@ public class DraftService {
         return this.draftRepository.findAll();
     }
 
-    public List<Draft> getAllByArticleAndIsApproved(Article article, boolean isApproved) {
-        return this.draftRepository.findByArticleAndIsApproved(article, isApproved);
+    public List<Draft> getAllByArticleAndIsApproved(Article article, Boolean isApproved) {
+        if (isApproved != null){
+            return this.draftRepository.findByArticleAndIsApproved(article, isApproved);
+        } else {
+            return this.draftRepository.findByArticleAndIsApprovedIsNull(article);
+        }
     }
 
     public List<Draft> getAllApprovedDraftsByUser(User user) {
