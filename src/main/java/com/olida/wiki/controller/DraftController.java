@@ -79,7 +79,7 @@ public class DraftController {
 
 
     @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody List<Draft> getDrafts(@PathVariable(value="article_id") String article_id, HttpServletResponse response) {
+    public @ResponseBody List<Draft> getDrafts(@PathVariable(value="article_id") String article_id, @RequestParam (required = false) Boolean isApproved, HttpServletResponse response) {
         ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
         HttpServletRequest request = attr.getRequest();
         String bearerToken = request.getHeader("Authorization");
@@ -92,10 +92,7 @@ public class DraftController {
 
         Optional<Article> article = articleService.getOne(Integer.valueOf(article_id));
         if (article.isPresent()){
-            List<Draft> drafts = draftService.getAllByArticleAndIsApproved(article.get(), true);
-            if(user.getIsadmin()) {
-                drafts.addAll(draftService.getAllByArticleAndIsApproved(article.get(), false));
-            }
+            List<Draft> drafts = draftService.getAllByArticleAndIsApproved(article.get(), isApproved);
             return drafts;
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
