@@ -129,13 +129,11 @@ public class DraftController {
         if (user.getIsadmin()){
             Optional<Draft> requestedDraft = draftService.getOne(Integer.valueOf(draft_id));
             if (requestedDraft.isPresent()){
-                if (requestedDraft.get().getIsApproved() != null) {
-                    requestedDraft.get().setIsApproved(draft.getIsApproved());
-                    List<Draft> approvedDrafts = draftService.getAllApprovedDraftsByUser(requestedDraft.get().getAuthor());
-                    if (approvedDrafts.stream().count() > 3) {
-                        requestedDraft.get().getAuthor().setIsadmin(true);
-                        userService.saveUser(requestedDraft.get().getAuthor());
-                    }
+                requestedDraft.get().setIsApproved(draft.getIsApproved());
+                List<Draft> approvedDrafts = draftService.getAllApprovedDraftsByUser(requestedDraft.get().getAuthor());
+                if (approvedDrafts.stream().count() > 3) {
+                    requestedDraft.get().getAuthor().setIsadmin(true);
+                    userService.saveUser(requestedDraft.get().getAuthor());
                 }
                 return draftService.save(requestedDraft.get());
             }
