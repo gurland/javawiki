@@ -2,9 +2,11 @@ package com.olida.wiki.controller;
 
 
 import com.olida.wiki.model.Article;
+import com.olida.wiki.model.Draft;
 import com.olida.wiki.model.User;
 import com.olida.wiki.security.JwtTokenRepository;
 import com.olida.wiki.service.ArticleService;
+import com.olida.wiki.service.DraftService;
 import com.olida.wiki.service.UserService;
 import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.Claims;
@@ -24,10 +26,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.lang.model.type.UnionType;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Base64;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.sql.Timestamp;
+import java.util.*;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -37,12 +37,14 @@ public class ArticleController {
     private ArticleService articleService;
 
     private JwtTokenRepository tokenRepository;
+    private DraftService draftService;
 
 
-    public ArticleController(UserService userService, ArticleService articleService, JwtTokenRepository jwtTokenRepository) {
+    public ArticleController(UserService userService, ArticleService articleService, JwtTokenRepository jwtTokenRepository, DraftService draftService) {
         this.userService = userService;
         this.articleService = articleService;
         this.tokenRepository = jwtTokenRepository;
+        this.draftService = draftService;
     }
 
 
@@ -59,7 +61,19 @@ public class ArticleController {
         User user = userService.getByLogin(username);
 
         if (user.getIsadmin()){
-            return articleService.save(article);
+            Article createdArticle = articleService.save(article);
+            Draft freshDraft = new Draft();
+            freshDraft.setArticle(createdArticle);
+            freshDraft.setAuthor(user);
+            freshDraft.setIsApproved(true);
+            freshDraft.setFirst("");
+            freshDraft.setSecond("");
+            freshDraft.setThird("");
+            Date now = new Date();
+            freshDraft.setCreatedAt(new Timestamp(now.getTime()));
+            draftService.save(freshDraft);
+            return createdArticle;
+
         } else {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return articleService.getAll();
