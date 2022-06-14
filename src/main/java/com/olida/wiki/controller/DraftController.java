@@ -77,6 +77,9 @@ public class DraftController {
         Optional<Article> article = articleService.getOne(Integer.valueOf(article_id));
         article.ifPresent(draft::setArticle);
         draft.setAuthor(user);
+        if (user.getIsadmin()) {
+            draft.setIsApproved(true);
+        }
 
         return draftService.save(draft);
     }
